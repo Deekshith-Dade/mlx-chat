@@ -41,7 +41,7 @@ class ChatApp(App):
     def get_main_screen(self) -> "MainScreen":
         from mlx_chat.screens.main import MainScreen
 
-        return MainScreen()
+        return MainScreen(model="gpt-4o")
 
     @work
     async def action_settings(self) -> None:

@@ -23,5 +23,5 @@ class MainScreen(Screen):
         #     yield Response("INTERFACE 2037 READY FOR INQUIRY")
         # yield Input(placeholder="How can I help you?")
         with containers.Center():
-            yield Conversation(model_name='gpt-4o')
+            yield Conversation(model_name=self.model_name)
         yield Footer()
