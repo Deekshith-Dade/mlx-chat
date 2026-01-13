@@ -1,0 +1,23 @@
+LoadingScreen {
+    Screen {
+        background: #000000;
+        color: #e0e0e0;
+    }
+
+
+    #loading-throbber {
+        width: 100%;
+        visibility: visible;
+    }
+        
+    #loading-container {
+        align: center middle;
+    }
+
+    Static {
+        width: auto;
+        color: #e0e0e0;
+        opacity: 0.9;
+        text-style: bold;
+    }
+}

@@ -1,10 +1,11 @@
+from asyncio import sleep
 import llm
 from textual import containers, getters, on, work
 from textual.app import ComposeResult
 from textual.reactive import reactive, var
 from textual.widgets import Input
 
-from mlx_chat.agent.agent import AgentBase, AgentFail, AgentReady
+from mlx_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady
 from mlx_chat.widgets.throbber import Throbber
 from mlx_chat.widgets.user_input import UserInput
 from mlx_chat.widgets.response import Response, ResponseUpdate
@@ -15,34 +16,36 @@ SYSTEM = "You are the HAL 9000 the AI from the movie 2001 Space Odyssey and you 
 class Conversation(containers.Vertical):
     
     BINDING_GROUP_TITLE = "Conversation"
-    model_name = var("gemini-2.5-flash")
+    model_name = var("gpt-4o")
     busy_count = var(0)
     
     throbber: getters.query_one(Throbber) = getters.query_one("#throbber")
 
     agent: var[AgentBase | None] = var(None, bindings=True)
-    
+    model_name: var[str | None] = var("mlx-community/gemma-3n-E2B-it-4bit")
 
-    def __init__(self, model_name: str):
+    def __init__(self):
         super().__init__()
-        self.model_name = model_name
         self._agent_response: Response | None = None
     
     async def on_mount(self) -> None:
-        def start_agent() -> None:
-            # from mlx_chat.agent.llm_agent import LLMAgent
-            from mlx_chat.agent.mlx_vlm_agent import MLXVLMAgent
-
-            self.agent = MLXVLMAgent(self.model_name) 
-            self.agent.start(self)
-
-        self.call_after_refresh(start_agent)
-    
+        self.post_message(AgentLoading(loading_message=f"Loading {self.model_name}..."))
+        self.call_after_refresh(self.start_agent)
+            
     def compose(self) -> ComposeResult:
         yield Throbber(id="throbber")
         with containers.Vertical(id="chat-view"):
             yield Input(placeholder="How can I help you?", id="input-area")
  
+    @work(thread=True)
+    async def start_agent(self) -> None:
+        # from mlx_chat.agent.llm_agent import LLMAgent as Agent
+        from mlx_chat.agent.mlx_vlm_agent import MLXVLMAgent as Agent
+
+        self.agent = Agent(self.model_name) 
+        self.agent.start(self)
+
+
     @on(Input.Submitted)
     async def on_input(self, event: Input.Submitted) -> None:
         chat_view = self.query_one("#chat-view")
@@ -63,7 +66,6 @@ class Conversation(containers.Vertical):
         
     @on(AgentFail)
     async def on_agent_fail(self, event: AgentFail) -> None:
-        event.stop()
         if self._agent_response is not None:
             await self._agent_response.append_fragment(event.details)
         else:
@@ -73,7 +75,6 @@ class Conversation(containers.Vertical):
 
     @on(AgentReady)
     async def on_agent_ready(self, event: AgentReady) -> None:
-        event.stop()
         message = f"{self.model_name} is ready for Inquiry."
         if self._agent_response is not None:
             await self._agent_response.append_fragment(message)

@@ -10,6 +10,11 @@ class AgentReady(Message):
     """Agent is ready."""
 
 @dataclass
+class AgentLoading(Message):
+    """Agent is being loaded."""
+    loading_message: Optional[str] = None
+
+@dataclass
 class AgentFail(Message):
     """Agent Failed to Start"""
     message: str

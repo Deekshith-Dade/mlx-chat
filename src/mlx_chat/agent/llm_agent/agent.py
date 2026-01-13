@@ -5,7 +5,7 @@ from llm.models import dataclass
 
 from textual.message import Message
 from textual.message_pump import MessagePump
-from mlx_chat.agent.agent import AgentBase, AgentFail, AgentReady, MessageContainer, MessageDetails
+from mlx_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady, MessageContainer, MessageDetails
 from mlx_chat.widgets.response import ResponseUpdate
 
 from dotenv import load_dotenv
@@ -34,6 +34,7 @@ class LLMAgent(AgentBase):
 
     def start(self, message_target: MessagePump | None = None) -> None:
         self._message_target = message_target
+        self.post_message(AgentLoading())
         # logging 
         try:
             model = llm.get_model(self.model_name)

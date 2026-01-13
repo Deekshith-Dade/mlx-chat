@@ -7,21 +7,20 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Footer
 
+from mlx_chat.agent.agent import AgentReady
 from mlx_chat.widgets.conversation import Conversation
+
 
 
 class MainScreen(Screen):
     CSS_PATH = "main.tcss"
 
-    def __init__(self, model: Optional[Any] = None):
-        super().__init__()
-        self.model_name = model
+    # def __init__(self, model: Optional[Any] = None):
+    #     super().__init__()
     
     def compose(self) -> ComposeResult:
-        # yield Header()
-        # with Vertical(id="chat-view"):
-        #     yield Response("INTERFACE 2037 READY FOR INQUIRY")
-        # yield Input(placeholder="How can I help you?")
         with containers.Center():
-            yield Conversation(model_name=self.model_name)
+            yield Conversation()
         yield Footer()
+    
+       

@@ -4,7 +4,7 @@ from mlx_vlm import apply_chat_template
 from mlx_vlm.generate import stream_generate, load
 
 from textual.message_pump import MessagePump
-from mlx_chat.agent.agent import AgentBase, AgentFail, AgentReady, MessageContainer, MessageDetails
+from mlx_chat.agent.agent import AgentBase, AgentFail, AgentReady, AgentLoading, MessageContainer, MessageDetails
 from mlx_chat.widgets.response import ResponseUpdate
 
 
@@ -33,6 +33,7 @@ class MLXVLMAgent(AgentBase):
         super().__init__(model_name)
         self.agent = None
         self.processor = None
+        self.max_tokens = 2048
     
     def start(self, message_target: MessagePump | None = None) -> None:
         self._message_target = message_target
@@ -72,7 +73,14 @@ class MLXVLMAgent(AgentBase):
         try:
             prompt = self._prepare_messages()
             last_response = None
-            for response in stream_generate(self.agent, self.processor, prompt, image = None, audio = None):
+            for response in stream_generate(
+                self.agent, 
+                self.processor, 
+                prompt, 
+                image = None, 
+                audio = None,
+                max_tokens = self.max_tokens
+            ):
                 text += response.text
                 self.post_message(ResponseUpdate(text=response.text))
                 last_response = response
