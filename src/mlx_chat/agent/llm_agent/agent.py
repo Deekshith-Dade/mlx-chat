@@ -30,13 +30,7 @@ class LLMAgent(AgentBase):
     def __init__(self, model_name: str) -> None:
         super().__init__(model_name)
         self.agent = None
-        self._message_target: MessagePump | None = None
-        # session_id later
-    
-    def post_message(self, message: Message) -> bool:
-        if (message_target := self._message_target) is None:
-            return False
-        return message_target.post_message(message)
+        # session stuff later
 
     def start(self, message_target: MessagePump | None = None) -> None:
         self._message_target = message_target
@@ -58,16 +52,19 @@ class LLMAgent(AgentBase):
 
 
     async def send_prompt(self, prompt: str) -> str | None:
-        self.history.append(LLMMessageContainer(role="user", content="user_message"))
+        self.history.append(LLMMessageContainer(role="user", content=prompt))
         if self.agent is None: 
             self.post_message(AgentFail("Agent Not available", "Agent Not available"))
             return
-        
-        llm_response = self.agent.prompt(prompt)
-        response_content = ""
-        for chunk in llm_response:
-            response_content += chunk
-            self.post_message(ResponseUpdate(text=chunk))
+        try:
+            llm_response = self.agent.prompt(prompt)
+            response_content = ""
+            for chunk in llm_response:
+                response_content += chunk
+                self.post_message(ResponseUpdate(text=chunk))
+        except Exception as e:
+            print(f"Exception: {e}")
+            self.post_message(AgentFail(e, "Failed During Generation"))
         
         
         

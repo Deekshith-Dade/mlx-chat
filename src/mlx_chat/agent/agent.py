@@ -4,6 +4,7 @@ from typing import Optional
 
 from textual.content import Content
 from textual.message import Message
+from textual.message_pump import MessagePump
 
 class AgentReady(Message):
     """Agent is ready."""
@@ -27,9 +28,15 @@ class MessageContainer(ABC):
 class AgentBase(ABC):
     def __init__(self, model_name: str) -> None:
         self.model_name = model_name
+        self._message_target: MessagePump | None = None
         self.history: list[MessageContainer] = []
         super().__init__()
     
+    def post_message(self, message: Message) -> bool:
+        if (message_target := self._message_target) is None:
+            return False
+        return message_target.post_message(message)
+
     @abstractmethod
     async def send_prompt(self, prompt: str) -> str | None:
         """"""

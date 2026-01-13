@@ -30,9 +30,10 @@ class Conversation(containers.Vertical):
     
     async def on_mount(self) -> None:
         def start_agent() -> None:
-            from mlx_chat.agent.llm_agent import LLMAgent
+            # from mlx_chat.agent.llm_agent import LLMAgent
+            from mlx_chat.agent.mlx_vlm_agent import MLXVLMAgent
 
-            self.agent = LLMAgent(self.model_name) 
+            self.agent = MLXVLMAgent(self.model_name) 
             self.agent.start(self)
 
         self.call_after_refresh(start_agent)
@@ -46,10 +47,10 @@ class Conversation(containers.Vertical):
     async def on_input(self, event: Input.Submitted) -> None:
         chat_view = self.query_one("#chat-view")
         event.input.clear()
-        await chat_view.mount(UserInput(event.value))
+        await chat_view.mount(userInput := UserInput(event.value))
+        userInput.scroll_visible()
         self._agent_response = response = Response()
         await chat_view.mount(response)
-        response.anchor()
         response.border_title = self.model_name.upper()
         self.send_prompt_to_agent(event.value)
     
@@ -58,6 +59,7 @@ class Conversation(containers.Vertical):
         event.stop()
         if self._agent_response is not None:
             await self._agent_response.append_fragment(event.text)
+            self._agent_response.scroll_visible()
         
     @on(AgentFail)
     async def on_agent_fail(self, event: AgentFail) -> None:
@@ -72,11 +74,12 @@ class Conversation(containers.Vertical):
     @on(AgentReady)
     async def on_agent_ready(self, event: AgentReady) -> None:
         event.stop()
+        message = f"{self.model_name} is ready for Inquiry."
         if self._agent_response is not None:
-            await self._agent_response.append_fragment("INTERFACE 2037 READY FOR INQUIRY")
+            await self._agent_response.append_fragment(message)
         else:
             chat_view = self.query_one("#chat-view")
-            await chat_view.mount(response := Response("INTERFACE 2037 READY FOR INQUIRY"))
+            await chat_view.mount(response := Response(message))
             response.anchor()
 
 
