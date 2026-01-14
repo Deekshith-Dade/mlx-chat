@@ -5,11 +5,11 @@ from textual.app import ComposeResult
 from textual.reactive import reactive, var
 from textual.widgets import Input
 
-from mlx_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady
-from mlx_chat.app import ChatApp
-from mlx_chat.widgets.throbber import Throbber
-from mlx_chat.widgets.user_input import UserInput
-from mlx_chat.widgets.response import Response, ResponseMetadataUpdate, ResponseUpdate
+from le_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady
+from le_chat.app import ChatApp
+from le_chat.widgets.throbber import Throbber
+from le_chat.widgets.user_input import UserInput
+from le_chat.widgets.response import Response, ResponseMetadataUpdate, ResponseUpdate
 
 
 SYSTEM = "You are the HAL 9000 the AI from the movie 2001 Space Odyssey and you are sentient. Have fun with user pretending you are this."
@@ -41,8 +41,8 @@ class Conversation(containers.Vertical):
  
     @work(thread=True)
     async def start_agent(self) -> None:
-        # from mlx_chat.agent.llm_agent import LLMAgent as Agent
-        from mlx_chat.agent.mlx_vlm_agent import MLXVLMAgent as Agent
+        # from le_chat.agent.llm_agent import LLMAgent as Agent
+        from le_chat.agent.mlx_vlm_agent import MLXVLMAgent as Agent
         self.agent = Agent(self.model_name) 
         self.agent.start(self)
 

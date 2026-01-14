@@ -5,8 +5,8 @@ from llm.models import dataclass
 
 from textual.message import Message
 from textual.message_pump import MessagePump
-from mlx_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady, MessageContainer, MessageDetails
-from mlx_chat.widgets.response import ResponseUpdate
+from le_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady, MessageContainer, MessageDetails
+from le_chat.widgets.response import ResponseUpdate
 
 from dotenv import load_dotenv
 load_dotenv()

@@ -20,4 +20,19 @@
             dock: top;
             padding: 1 0;
         }
+
+        .container {
+    height: auto;
+    width: auto;
+}
+
+        Switch {
+            height: auto;
+            width: auto;
+        }
+        .label {
+    height: 3;
+    content-align: center middle;
+    width: auto;
+}
     }

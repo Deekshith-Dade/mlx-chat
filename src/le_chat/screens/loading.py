@@ -5,7 +5,7 @@ from textual.reactive import reactive, var
 from textual.screen import ModalScreen, ScreenResultType
 from textual.widgets import Placeholder, Static
 
-from mlx_chat.widgets.throbber import Throbber
+from le_chat.widgets.throbber import Throbber
 
 class LoadingScreen(ModalScreen):
     CSS_PATH = "loading.tcss"

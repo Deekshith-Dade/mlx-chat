@@ -1,26 +1,23 @@
 from typing import TYPE_CHECKING, ClassVar, Optional
 
-from textual import getters, on, work
-from textual.app import App, ComposeResult
+from textual import on, work
+from textual.app import App 
 from textual.binding import Binding, BindingType
 from textual.reactive import var
-from textual.widgets import Header, Input, Footer, Markdown
-from textual.containers import VerticalScroll
-import llm
 
-from mlx_chat.agent.agent import AgentFail, AgentLoading, AgentReady
+from le_chat.agent.agent import AgentFail, AgentLoading, AgentReady
 
-from mlx_chat.screens.loading import LoadingScreen
+from le_chat.screens.loading import LoadingScreen
 
 if TYPE_CHECKING:
-    from mlx_chat.screens.main import ChatScreen
-    from mlx_chat.screens.settings import SettingsScreen
-    from mlx_chat.screens.launcher import Launcher
+    from le_chat.screens.chat import ChatScreen
+    from le_chat.screens.settings import SettingsScreen
+    from le_chat.screens.launcher import Launcher
     
 SYSTEM = """Formulate all responses as if you where the sentient AI named Mother from the Aliens movies."""
 
 def get_settings_screen() -> "SettingsScreen":
-    from mlx_chat.screens.settings import SettingsScreen
+    from le_chat.screens.settings import SettingsScreen
 
     return SettingsScreen()
 
@@ -28,30 +25,28 @@ def get_loading_screen() -> "LoadingScreen":
 
     return LoadingScreen()
 
-def get_main_screen() -> "ChatScreen":
-        from mlx_chat.screens.chat import ChatScreen
+def get_chat_screen() -> "ChatScreen":
+        from le_chat.screens.chat import ChatScreen
 
         return ChatScreen()
 
 def get_launcher_screen() -> "Launcher":
-        from mlx_chat.screens.launcher import LauncherScreen
+        from le_chat.screens.launcher import LauncherScreen
         
         return LauncherScreen()
 
 
 class ChatApp(App):
-    # bindings and stuff
-    # AUTO_FOCUS = "Input"
 
     SCREENS = {
         "settings": get_settings_screen,
         "loading": get_loading_screen,
-        "main": get_main_screen,
+        "chat": get_chat_screen,
     }
 
     MODES = {
         "launcher": get_launcher_screen,
-        "chat": get_main_screen,
+        "chat": get_chat_screen,
     }
 
 

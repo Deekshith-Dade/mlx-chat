@@ -13,12 +13,12 @@ from textual.message import Message
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Placeholder, Static
 
-from mlx_chat import interaction_item_schema
-from mlx_chat.app import ChatApp
-from mlx_chat.interaction_item_schema import InteractionItemSchema
-from mlx_chat.screens.settings import SettingsScreen
-from mlx_chat.widgets import grid_select
-from mlx_chat.widgets.grid_select import GridSelect 
+from le_chat import interaction_item_schema
+from le_chat.app import ChatApp
+from le_chat.interaction_item_schema import InteractionItemSchema
+from le_chat.screens.settings import SettingsScreen
+from le_chat.widgets import grid_select
+from le_chat.widgets.grid_select import GridSelect 
 
 @dataclass
 class LaunchItem(Message):
@@ -218,7 +218,7 @@ class LauncherScreen(Screen):
     async def on_grid_select_selected(self, event: GridSelect.Selected):
         assert isinstance(event.selected_widget, LauncherItem)
         # open any model to display information here
-        from mlx_chat.screens.interaction_demo import InteractionDemo
+        from le_chat.screens.interaction_demo import InteractionDemo
 
         # modal_response = await self.app.push_screen_wait(
         #     InteractionDemo(event.selected_widget.schema)
@@ -232,7 +232,7 @@ class LauncherScreen(Screen):
     async def open_interaction_detail(self, message: OpenInteractionDetails) -> None:
         pass
         # open interaction modal  and post_message
-        from mlx_chat.screens.interaction_demo import InteractionDemo
+        from le_chat.screens.interaction_demo import InteractionDemo
 
         try:
             interaction_schema = self._interaction_items[message.item_name]
@@ -248,7 +248,7 @@ class LauncherScreen(Screen):
     async def on_launcher_selected(self, event: GridSelect.Selected):
         launcher_item = event.selected_widget
         assert isinstance(launcher_item, LauncherItem)
-        from mlx_chat.screens.interaction_demo import InteractionDemo
+        from le_chat.screens.interaction_demo import InteractionDemo
 
         # modal_response = await self.app.push_screen_wait(
         #     InteractionDemo(event.selected_widget.schema)
@@ -259,7 +259,7 @@ class LauncherScreen(Screen):
 
     @work
     async def launch_interaction(self, item_name: str) -> None:
-        from mlx_chat.screens.chat import ChatScreen
+        from le_chat.screens.chat import ChatScreen
 
         screen = None
         if item_name == "chat":
@@ -323,6 +323,6 @@ class LauncherScreen(Screen):
         self.launcher.focus()
 
 if __name__ == "__main__":
-    from mlx_chat.app import ChatApp
+    from le_chat.app import ChatApp
     app = ChatApp(mode="launcher")
     app.run()

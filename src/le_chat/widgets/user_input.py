@@ -3,8 +3,8 @@ from textual import containers
 from textual.app import ComposeResult
 from textual.widgets import Markdown
 
-from mlx_chat.menus import MenuItem
-from mlx_chat.widgets.non_selectable_label import NonSelectableLabel
+from le_chat.menus import MenuItem
+from le_chat.widgets.non_selectable_label import NonSelectableLabel
 
 class UserInput(Markdown):
     pass

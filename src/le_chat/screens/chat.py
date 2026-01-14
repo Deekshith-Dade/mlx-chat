@@ -3,7 +3,7 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Footer
 
-from mlx_chat.widgets.conversation import Conversation
+from le_chat.widgets.conversation import Conversation
 
 class ChatScreen(Screen):
     CSS_PATH = "chat.tcss"

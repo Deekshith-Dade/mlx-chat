@@ -4,8 +4,8 @@ from mlx_vlm import apply_chat_template
 from mlx_vlm.generate import stream_generate, load
 
 from textual.message_pump import MessagePump
-from mlx_chat.agent.agent import AgentBase, AgentFail, AgentReady, AgentLoading, MessageContainer, MessageDetails
-from mlx_chat.widgets.response import ResponseUpdate, ResponseMetadataUpdate
+from le_chat.agent.agent import AgentBase, AgentFail, AgentReady, AgentLoading, MessageContainer, MessageDetails
+from le_chat.widgets.response import ResponseUpdate, ResponseMetadataUpdate
 
 
 @dataclass

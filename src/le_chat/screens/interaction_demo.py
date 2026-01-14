@@ -4,7 +4,7 @@ from textual.binding import Binding
 from textual.screen import ModalScreen
 from textual.widgets import Placeholder
 
-from mlx_chat.interaction_item_schema import InteractionItemSchema
+from le_chat.interaction_item_schema import InteractionItemSchema
 
 
 class InteractionDemo(ModalScreen):
