@@ -6,6 +6,7 @@ from textual.reactive import reactive, var
 from textual.widgets import Input
 
 from mlx_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady
+from mlx_chat.app import ChatApp
 from mlx_chat.widgets.throbber import Throbber
 from mlx_chat.widgets.user_input import UserInput
 from mlx_chat.widgets.response import Response, ResponseUpdate
@@ -22,7 +23,9 @@ class Conversation(containers.Vertical):
     throbber: getters.query_one(Throbber) = getters.query_one("#throbber")
 
     agent: var[AgentBase | None] = var(None, bindings=True)
-    model_name: var[str | None] = var("mlx-community/gemma-3n-E2B-it-4bit")
+    # mlx-community/gemma-3n-E2B-it-4bit
+    model_name: var[str | None] = var("mlx-community/gemma-3-12b-it-qat-4bit")
+    
 
     def __init__(self):
         super().__init__()
@@ -41,7 +44,6 @@ class Conversation(containers.Vertical):
     async def start_agent(self) -> None:
         # from mlx_chat.agent.llm_agent import LLMAgent as Agent
         from mlx_chat.agent.mlx_vlm_agent import MLXVLMAgent as Agent
-
         self.agent = Agent(self.model_name) 
         self.agent.start(self)
 
@@ -54,6 +56,7 @@ class Conversation(containers.Vertical):
         userInput.scroll_visible()
         self._agent_response = response = Response()
         await chat_view.mount(response)
+        response.scroll_to_center(self)
         response.border_title = self.model_name.upper()
         self.send_prompt_to_agent(event.value)
     

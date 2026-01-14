@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional
 from textual import getters, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
+from textual.reactive import var
 from textual.widgets import Header, Input, Footer, Markdown
 from textual.containers import VerticalScroll
 import llm
@@ -14,6 +15,7 @@ from mlx_chat.screens.loading import LoadingScreen
 if TYPE_CHECKING:
     from mlx_chat.screens.main import MainScreen
     from mlx_chat.screens.settings import SettingsScreen
+    from mlx_chat.screens.launcher import Launcher
     
 SYSTEM = """Formulate all responses as if you where the sentient AI named Mother from the Aliens movies."""
 
@@ -26,6 +28,17 @@ def get_loading_screen() -> "LoadingScreen":
 
     return LoadingScreen()
 
+def get_main_screen() -> "MainScreen":
+        from mlx_chat.screens.main import MainScreen
+
+        return MainScreen()
+
+def get_launcher_screen() -> "Launcher":
+        from mlx_chat.screens.launcher import LauncherScreen
+        
+        return LauncherScreen()
+
+
 class ChatApp(App):
     # bindings and stuff
     # AUTO_FOCUS = "Input"
@@ -33,9 +46,11 @@ class ChatApp(App):
     SCREENS = {
         "settings": get_settings_screen,
         "loading": get_loading_screen,
+        "main": get_main_screen,
     }
 
-    MODES = {}
+    MODES = {"launcher": get_launcher_screen}
+
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding(
             "f2,ctrl+comma",
@@ -46,16 +61,16 @@ class ChatApp(App):
     ]
     
     loading_screen: LoadingScreen | None = None
-    # def __init__(self, config):
-        # self.config = config
+    _settings = var(dict) # should have interactionitems
+    def __init__(self, mode: Optional[str] = None):
+        self._initial_mode = mode
+        super().__init__()
 
     def on_mount(self) -> None:
-        self.push_screen(self.get_main_screen())
-
-    def get_main_screen(self) -> "MainScreen":
-        from mlx_chat.screens.main import MainScreen
-
-        return MainScreen()
+        if mode := self._initial_mode:
+            self.switch_mode(mode)
+        else:
+            self.push_screen(get_main_screen)
 
     @work
     async def action_settings(self) -> None:
@@ -77,10 +92,4 @@ class ChatApp(App):
         if self.loading_screen is not None:
             await self.loading_screen.action_dismiss()
             self.loading_screen = None
-        
- 
-
        
-if __name__ == "__main__":
-    app = ChatApp()
-    app.run()

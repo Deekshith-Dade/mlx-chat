@@ -22,5 +22,3 @@ class MainScreen(Screen):
         with containers.Center():
             yield Conversation()
         yield Footer()
-    
-       
