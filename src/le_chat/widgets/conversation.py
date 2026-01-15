@@ -7,6 +7,7 @@ from textual.widgets import Input
 
 from le_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady
 from le_chat.app import ChatApp
+from le_chat.widgets.prompt import Prompt
 from le_chat.widgets.throbber import Throbber
 from le_chat.widgets.user_input import UserInput
 from le_chat.widgets.response import Response, ResponseMetadataUpdate, ResponseUpdate
@@ -36,8 +37,9 @@ class Conversation(containers.Vertical):
             
     def compose(self) -> ComposeResult:
         yield Throbber(id="throbber")
-        with containers.Vertical(id="chat-view"):
-            yield Input(placeholder="How can I help you?", id="input-area")
+        with containers.Vertical(id="chat-layout"):
+            yield containers.Vertical(id="chat-view")
+            yield Prompt()
  
     @work(thread=True)
     async def start_agent(self) -> None:

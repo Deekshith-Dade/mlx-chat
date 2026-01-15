@@ -1,66 +1,79 @@
-    Screen {
-        layout: grid;
-        grid-size: 1 2;
-        grid-rows: 1fr 1;
-        layers: base overlay;
-        background: #000000;
-    }
+Screen {
+    layout: grid;
+    grid-size: 1 2;
+    grid-rows: 1fr 1;
+    layers: base overlay;
+    background: #000000;
+}
 
-    #chat-view {
-        height: 100%;
-        width: 100%;
-        overflow-y: scroll;
-        padding: 0 0 0 0;
-        scrollbar-size: 1 1;
-        background: #000000;
-    }
+Conversation {
+    width: 100%;
+    height: 100%;
+}
 
-    #input-area {
-        dock: bottom;
-        width: 100%;
-        height: auto;
-        background: #000000;
-        &:focus {
-            border: tall #e0e0e0
-        }
-    }
+#chat-layout {
+    layout: grid;
+    grid-rows: 1fr auto;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+}
 
-    UserInput {
-       
-    }
-    
-        UserInput {
-        border-left: blank $secondary;
-        margin: 1 16 1 0; 
-        Markdown {            
-            padding:0 2 0 0;
-        }
-        Markdown > MarkdownBlock:last-child {
-            margin-bottom: 0;
-        }
-        MarkdownFence {                           
-            margin: 0 2 1 0;
-        }
-        #prompt {
-            margin: 0 1 0 0;
-            color:rgb(239, 239, 239);
-        }
+#chat-view {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    padding: 1 2 2 2;
+    scrollbar-size: 1 1;
+    background: #000000;
+}
 
-        padding: 1 2 1 2;
-        background: #1a1a1a 70%;
-        color: #ffffff;
-    }
+Prompt {
+    width: 100%;
+    padding: 0 1;
+}
 
-    Response {
-        border: wide #e0e0e0;
-        background: #0a0a0a;
-        color: #e0e0e0;          
-        margin: 1;      
-        margin-left: 8; 
-        padding: 1 2 0 2;
+#input-area {
+    width: 100%;
+    height: auto;
+    background: #000000;
+    color: #e0e0e0;
+    &:focus {
+        border: tall #e0e0e0;
     }
+}
 
-    Throbber {
+UserInput {
+    border-left: blank $secondary;
+    margin: 1 16 1 0;
+    Markdown {
+        padding: 0 2 0 0;
+    }
+    Markdown > MarkdownBlock:last-child {
+        margin-bottom: 0;
+    }
+    MarkdownFence {
+        margin: 0 2 1 0;
+    }
+    #prompt {
+        margin: 0 1 0 0;
+        color: rgb(239, 239, 239);
+    }
+    padding: 1 2 1 2;
+    background: #1a1a1a 70%;
+    color: #ffffff;
+}
+
+Response {
+    border: wide #e0e0e0;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    margin: 1;
+    margin-left: 8;
+    padding: 1 2 0 2;
+}
+
+Throbber {
     layer: overlay;
     dock: top;
     width: 100%;
@@ -68,5 +81,5 @@
     visibility: hidden;
     &.-busy {
         visibility: visible;
-    }    
+    }
 }

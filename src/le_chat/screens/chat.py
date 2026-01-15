@@ -12,6 +12,5 @@ class ChatScreen(Screen):
     #     super().__init__()
     
     def compose(self) -> ComposeResult:
-        with containers.Center():
-            yield Conversation()
+        yield Conversation()
         yield Footer()
