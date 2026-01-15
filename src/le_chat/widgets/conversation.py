@@ -7,7 +7,7 @@ from textual.widgets import Input
 
 from le_chat.agent.agent import AgentBase, AgentFail, AgentLoading, AgentReady
 from le_chat.app import ChatApp
-from le_chat.widgets.prompt import Prompt
+from le_chat.widgets.prompt import Prompt, UserInputSubmitted
 from le_chat.widgets.throbber import Throbber
 from le_chat.widgets.user_input import UserInput
 from le_chat.widgets.response import Response, ResponseMetadataUpdate, ResponseUpdate
@@ -25,7 +25,8 @@ class Conversation(containers.Vertical):
 
     agent: var[AgentBase | None] = var(None, bindings=True)
     # mlx-community/gemma-3n-E2B-it-4bit
-    model_name: var[str | None] = var("mlx-community/gemma-3-12b-it-qat-4bit")
+    # mlx-community/gemma-3-12b-it-qat-4bit
+    model_name: var[str | None] = var("mlx-community/gemma-3n-E2B-it-4bit")
 
     def __init__(self):
         super().__init__()
@@ -49,17 +50,17 @@ class Conversation(containers.Vertical):
         self.agent.start(self)
 
 
-    @on(Input.Submitted)
-    async def on_input(self, event: Input.Submitted) -> None:
+    @on(UserInputSubmitted)
+    async def on_input(self, event: UserInputSubmitted) -> None:
+        event.stop()
         chat_view = self.query_one("#chat-view")
-        event.input.clear()
-        await chat_view.mount(userInput := UserInput(event.value))
+        await chat_view.mount(userInput := UserInput(event.body))
         userInput.scroll_visible()
         self._agent_response = response = Response()
         await chat_view.mount(response)
         response.scroll_to_center(self)
         response.border_title = self.model_name.upper()
-        self.send_prompt_to_agent(event.value)
+        self.send_prompt_to_agent(event.body)
     
     @on(ResponseUpdate)
     async def on_response_update(self, event: ResponseUpdate) -> None:
