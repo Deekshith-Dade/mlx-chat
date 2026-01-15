@@ -1,11 +1,13 @@
 from dataclasses import dataclass
-from typing import Optional
+from pathlib import Path
+from typing import Dict, List, Optional
 from mlx_vlm import apply_chat_template
 from mlx_vlm.generate import stream_generate, load
 
 from textual.message_pump import MessagePump
 from le_chat.agent.agent import AgentBase, AgentFail, AgentReady, AgentLoading, MessageContainer, MessageDetails
 from le_chat.widgets.response import ResponseUpdate, ResponseMetadataUpdate
+from le_chat.agent.mlx_vlm_agent.prompt import build as build_prompt
 
 
 @dataclass
@@ -17,15 +19,20 @@ class MLXVLMMessageDetails(MessageDetails):
     generation_tps: float = 0.0
     peak_memory: float = 0.0
 
+@dataclass
 class MLXVLMMessageContainer(MessageContainer):
     role: str
     content: str
     details: Optional[MLXVLMMessageDetails] = None
+    images: Optional[List[str]] = None
+    audio: Optional[List[str]] = None
     
     def to_dict(self) -> dict:
         return {
             "role": self.role,
-            "content": self.content 
+            "content": self.content,
+            "images": self.images,
+            "audio": self.audio
         }
 
 class MLXVLMAgent(AgentBase):
@@ -34,6 +41,7 @@ class MLXVLMAgent(AgentBase):
         self.agent = None
         self.processor = None
         self.max_tokens = 2048
+        self.history: List[MLXVLMMessageContainer] = []
     
     def start(self, message_target: MessagePump | None = None) -> None:
         self._message_target = message_target
@@ -57,28 +65,47 @@ class MLXVLMAgent(AgentBase):
             mess.to_dict()
             for mess in self.history
         ]
+        messages = []
+        images = []
+        audio = []
+        for mess in self.history:
+            # message = mess.to_dict()
+            messages.append({
+                "role": mess.role,
+                "content": mess.content,
+            })
+            images.extend(mess.images or [])
+            audio.extend(mess.audio or [])
 
         messages = apply_chat_template(
-            self.processor, self.agent.config, messages, num_images=0, num_audios=0
+            self.processor, self.agent.config, messages, num_images=len(images), num_audios=len(audio)
         )
-        return messages
+        return messages, images, audio
         
     async def send_prompt(self, prompt: str) -> str | None:
-        self.history.append(MLXVLMMessageContainer(role="user", content=prompt))
+        mlxvlm_prompt = build_prompt(prompt)
+        user_input = MLXVLMMessageContainer(
+            role="user",
+            content=mlxvlm_prompt.prompt,
+            images=mlxvlm_prompt.images,
+            audio=mlxvlm_prompt.audio,
+        )
+        self.history.append(user_input)
+
         if self.agent is None:
             self.post_message(AgentFail("Agent Not available", "Agent Not available"))
             return 
 
         text = ""
         try:
-            prompt = self._prepare_messages()
+            prompt, images, audio = self._prepare_messages()
             last_response = None
             for response in stream_generate(
                 self.agent, 
                 self.processor, 
                 prompt, 
-                image = None, 
-                audio = None,
+                image = images, 
+                audio = audio,
                 max_tokens = self.max_tokens
             ):
                 text += response.text
@@ -100,7 +127,9 @@ class MLXVLMAgent(AgentBase):
             self.post_message(message)
             
             self.history.append(MLXVLMMessageContainer(
-                "assistant", text, details
+                role="assistant", 
+                content=text, 
+                details=details
             ))
 
         except Exception as e:

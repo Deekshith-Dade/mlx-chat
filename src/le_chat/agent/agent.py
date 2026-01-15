@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 
 from textual.content import Content
 from textual.message import Message
@@ -28,6 +28,8 @@ class MessageDetails(ABC):
 class MessageContainer(ABC):
     role: str
     content: str
+    images: Optional[List[str]]
+    audio: Optional[List[str]]
     details: Optional[MessageDetails] = None
 
 class AgentBase(ABC):
