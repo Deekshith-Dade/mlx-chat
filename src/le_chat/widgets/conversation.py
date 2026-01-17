@@ -156,8 +156,6 @@ class Conversation(containers.Vertical):
         if self.agent is not None and self.busy_count > 0:
             cancelled = await self.agent.cancel()
             if cancelled:
-                # Don't decrement busy_count here - let send_prompt_to_agent's finally block handle it
-                # Just trigger the turn over callback
                 self.call_later(self.agent_turn_over, "cancelled")
 
 

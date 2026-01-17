@@ -1,4 +1,5 @@
 import asyncio
+import threading
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -44,7 +45,7 @@ class MLXVLMAgent(AgentBase):
         self.processor = None
         self.max_tokens = 2048
         self.history: List[MLXVLMMessageContainer] = []
-        self._cancel_event: asyncio.Event = asyncio.Event()
+        self._cancel_event: threading.Event = threading.Event()
         self._is_generating: bool = False
     
     def _update_loading_status(self, status: str) -> None:
