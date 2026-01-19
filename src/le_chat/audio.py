@@ -185,6 +185,14 @@ class AudioProcessor:
             wf.setframerate(sample_rate)
             wf.writeframes(pcm16.tobytes())
 
+    def chunk_and_save_wav(self, output_path: str | Path):
+        for chunk in self.chunks():
+            chunk_path = Path(output_path).with_name(
+                f"{Path(output_path).stem}_chunk{chunk.seq:04d}.wav"
+            )
+            self._write_wav(chunk_path, chunk.samples, self.sr)
+            yield str(chunk_path.resolve())
+        
     def record_wav(self, output_path: str | Path, duration_sec: float):
         """
         Record audio for the specified duration and save to a WAV file.
@@ -215,7 +223,7 @@ class AudioProcessor:
 
 if __name__ == "__main__":
     ap = AudioProcessor(chunk_sec=5.0)
-    duration = 10.0
+    duration = 5.0
     outfile = Path("recording.wav")
     print(f"Recording {duration:.1f}s of audio to {outfile} ...")
     ap.record_wav(outfile, duration)

@@ -6,6 +6,7 @@ from textual.binding import Binding, BindingType
 from textual.reactive import var
 
 from le_chat.agent.agent import AgentFail, AgentLoading, AgentReady
+from le_chat.agent.stt_model.base import STTModelFail, STTModelLoading, STTModelReady
 
 from le_chat.screens.loading import LoadingScreen
 
@@ -109,6 +110,26 @@ class ChatApp(App):
 
     @on(AgentFail)
     async def on_agent_fail(self, event: AgentFail) -> None:
+        if self.loading_screen is not None:
+            await self.loading_screen.action_dismiss()
+            self.loading_screen = None
+
+    @on(STTModelLoading)
+    async def on_stt_model_loading(self, event: STTModelLoading) -> None:
+        if self.loading_screen is not None:
+            self.loading_screen.loading_text = event.loading_message
+        else:
+            self.loading_screen = self.get_screen("loading")
+            self.loading_screen.loading_text = event.loading_message
+            await self.push_screen(self.loading_screen)
+
+    @on(STTModelReady)
+    async def on_stt_model_ready(self, event: STTModelReady) -> None:
+        if self.loading_screen is not None:
+            await self.loading_screen.action_dismiss()
+
+    @on(STTModelFail)
+    async def on_stt_model_fail(self, event: STTModelFail) -> None:
         if self.loading_screen is not None:
             await self.loading_screen.action_dismiss()
             self.loading_screen = None
