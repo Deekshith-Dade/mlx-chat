@@ -33,6 +33,11 @@ Screen {
     padding: 1 2 2 2;
     scrollbar-size: 1 1;
     background: #000000;
+    
+    &:focus {
+        /* Subtle visual indication that stt-view has focus (spacebar active) */
+        background: #050505;
+    }
 }
 
 STTResponse {

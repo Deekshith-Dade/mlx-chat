@@ -70,7 +70,7 @@ class Conversation(containers.Vertical):
     @on(UserInputSubmitted)
     async def on_input(self, event: UserInputSubmitted) -> None:
         event.stop()
-        success, msg = validate_input_files(event.body)
+        success, msg = validate_input_files(event.body, allowed_types={"audio", "text", "image"})
         prompt_widget: Prompt = self.query_one("#user-prompt")
         if not success:
             prompt_widget.warning_message = msg

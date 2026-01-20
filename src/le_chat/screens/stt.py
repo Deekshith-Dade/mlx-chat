@@ -36,6 +36,8 @@ class SttScreen(Screen):
 
     async def on_mount(self) -> None:
         self.post_message(STTModelLoading(loading_message="Loading STT Model..."))
+        # Focus the stt-view so spacebar recording works immediately
+        self.query_one("#stt-view").focus()
         # Start the STT model load immediately after mount.
         self.load_model()
 
@@ -55,12 +57,16 @@ class SttScreen(Screen):
         yield Throbber(id="throbber")
         with containers.Vertical(id="stt-layout"):
             yield NonSelectableLabel("Idle", id="recording-indicator")
-            yield containers.Vertical(id="stt-view")
+            yield containers.VerticalScroll(id="stt-view", can_focus=True)
             yield Prompt(id="user-prompt")
 
     async def on_key(self, event: events.Key) -> None:
-        """Toggle recording on each space press."""
+        """Toggle recording on each space press (only when prompt is not focused)."""
         if event.key != "space":
+            return
+        # Don't intercept space if the prompt is focused - let user type
+        prompt = self.query_one("#user-prompt", Prompt)
+        if prompt.has_focus:
             return
         event.stop()
         if not self._recording:
@@ -96,7 +102,7 @@ class SttScreen(Screen):
         if not message.text:
             return
         if self._model_response is None:
-            stt_view = self.query_one("#stt-view", containers.Vertical)
+            stt_view = self.query_one("#stt-view", containers.VerticalScroll)
             self._model_response = STTResponse()
             self._model_response.border_title = self.model_name.upper()
             await stt_view.mount(self._model_response)
@@ -121,7 +127,7 @@ class SttScreen(Screen):
     @on(UserInputSubmitted)
     async def on_user_input_submitted(self, message: UserInputSubmitted) -> None:
         """Handle user input submission."""
-        success, msg = validate_input_files(message.body)
+        success, msg = validate_input_files(message.body, allowed_types={"audio"})
         prompt_widget: Prompt = self.query_one("#user-prompt")
         if not success:
             prompt_widget.warning_message = msg
@@ -129,13 +135,15 @@ class SttScreen(Screen):
         else:
             prompt_widget.clear()
         user_input = UserInput(message.body)
-        stt_view = self.query_one("#stt-view", containers.Vertical)
+        stt_view = self.query_one("#stt-view", containers.VerticalScroll)
         await stt_view.mount(user_input)
         user_input.anchor()
         self._model_response = response = STTResponse()
         await stt_view.mount(response)
         response.border_title = self.model_name.upper()
         response.anchor()
+        # Return focus to stt-view so spacebar recording works
+        stt_view.focus()
         self.send_files_to_model(message.body)
     
     @work(thread=True)
