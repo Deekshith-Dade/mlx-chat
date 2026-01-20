@@ -2,6 +2,7 @@
 import queue
 import threading
 from typing import Union
+from pathlib import Path
 
 import mlx.core as mx
 # Import huggingface_utils first to apply tqdm patches before other imports
@@ -63,9 +64,13 @@ class MLXAudioSTTModel(STTModelBase):
             return
         if isinstance(audio_path, str):
             audio_path = [audio_path]
-        for path in audio_path:
+        for idx, path in enumerate(audio_path):
             try:
                 segments = self.model.generate(path, generation_stream=generation_stream, verbose=True)
+                if idx > 0:
+                    self.post_message(STTResponseUpdate("\n\n---\n\n"))
+                filename = Path(path).name
+                self.post_message(STTResponseUpdate(f"**{filename}**\n\n"))
                 self.post_message(STTResponseUpdate(segments.text))
             except Exception as e:
                 import traceback
