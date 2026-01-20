@@ -1,12 +1,39 @@
 """Utilities for downloading models from Hugging Face Hub.
 
-These utilities run downloads in a subprocess to avoid multiprocessing
-conflicts with Textual's terminal handling.
+Includes tqdm patches to prevent multiprocessing lock conflicts with Textual.
 """
 import re
 import subprocess
 import sys
 from typing import Callable
+
+# Patch tqdm to prevent multiprocessing lock creation which conflicts with Textual
+# tqdm tries to create mp locks in __new__ before checking 'disable', causing
+# "ValueError: bad value(s) in fds_to_keep" in subprocess contexts
+import tqdm.std
+
+
+class _DummyLock:
+    """A dummy lock that does nothing, for use with tqdm in Textual."""
+    def acquire(self, *args, **kwargs): return True
+    def release(self, *args, **kwargs): pass
+    def __enter__(self): return self
+    def __exit__(self, *args): pass
+
+
+# Pre-set the locks so tqdm doesn't try to create real multiprocessing locks
+tqdm.std.tqdm._lock = _DummyLock()
+tqdm.std.tqdm._instances = set()
+
+
+def _safe_tqdm_del(self):
+    try:
+        self.close()
+    except (AttributeError, ValueError):
+        pass
+
+
+tqdm.std.tqdm.__del__ = _safe_tqdm_del
 
 
 def parse_progress_line(line: str) -> str | None:
@@ -56,6 +83,8 @@ def parse_progress_line(line: str) -> str | None:
 
 def download_model(model_name: str, on_progress: Callable[[str], None] | None = None) -> bool:
     """Download a model from Hugging Face Hub in a subprocess.
+    
+    Uses subprocess to show download progress without tqdm conflicts.
     
     Args:
         model_name: The model identifier (e.g., "mlx-community/gemma-3n-E2B-it-4bit")

@@ -9,6 +9,9 @@ from textual.message_pump import MessagePump
 class STTModelReady(Message):
     """STT Model ready."""
 
+class STTFullTranscriptionReady(Message):
+    """Full transcription is ready."""
+
 @dataclass
 class STTModelLoading(Message):
     """Agent is being loaded."""

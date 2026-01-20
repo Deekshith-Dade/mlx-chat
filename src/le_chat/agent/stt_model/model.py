@@ -2,10 +2,11 @@
 import queue
 import threading
 
-from textual.message_pump import MessagePump
+# Import huggingface_utils first to apply tqdm patches before other imports
 from le_chat.agent.huggingface_utils import download_model
-from le_chat.agent.stt_model.base import STTModelBase, STTModelFail, STTModelReady, STTModelLoading
 
+from textual.message_pump import MessagePump
+from le_chat.agent.stt_model.base import STTModelBase, STTModelFail, STTModelReady, STTModelLoading, STTFullTranscriptionReady
 from mlx_audio.utils import load_model
 
 from le_chat.widgets.stt_response import STTResponseUpdate
@@ -26,7 +27,6 @@ class MLXAudioSTTModel(STTModelBase):
         self._message_target = message_target
         try:
             self.model = load_model(self.model_name)
-            print(self.model)
             self.post_message(STTModelReady())
         except Exception:
             self._update_loading_status(f"Downloading {self.model_name}...")
@@ -38,6 +38,8 @@ class MLXAudioSTTModel(STTModelBase):
                 else:
                     self.post_message(STTModelFail("Download Failed", f"Failed to download model {self.model_name}."))
             except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 self.post_message(STTModelFail(str(e), "Loading Failed"))
     
     # async def change_model
@@ -49,15 +51,25 @@ class MLXAudioSTTModel(STTModelBase):
             except queue.Empty:
                 continue
 
+            # Sentinel value signals end of input
+            if audio_path is None:
+                break
+
             self._is_generating = True
             try:
-                segments = self.model.generate(audio_path)
-                transcription = " ".join([segment.text for segment in segments])
+                segments = self.model.generate(audio_path, verbose=True)
+                transcription = segments.text
                 self.post_message(STTResponseUpdate(transcription))
             except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 self.post_message(STTModelFail(str(e), "Transcription Failed"))
-            # finally:
-            #     self._is_generating = False
+            finally:
+                self._is_generating = False
+        
+        self._is_generating = False
+        self.post_message(STTFullTranscriptionReady())
+                
 
     async def insert_audio(self, audio_path: str) -> None:
         try:
@@ -69,6 +81,10 @@ class MLXAudioSTTModel(STTModelBase):
             except queue.Full:
                 pass
         
+    async def finish(self) -> None:
+        """Signal that no more audio will be added."""
+        self._process_queue.put(None)
+
     async def cancel(self) -> bool:
         if not self._cancel_event.is_set():
             self._cancel_event.set()
