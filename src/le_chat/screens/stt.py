@@ -18,7 +18,9 @@ class SttScreen(Screen):
         ("escape", "cancel_generation", "Stop Recording"),
     ]
 
-    model_name: var[str | None] = var("mlx-community/whisper-large-v3-turbo")
+    # mlx-community/parakeet-tdt-0.6b-v2
+    # mlx-community/whisper-large-v3-turbo
+    model_name: var[str | None] = var("mlx-community/parakeet-tdt-0.6b-v2")
 
     def __init__(self, sample_rate=16000, chunk_sec=5.0):
         super().__init__()
@@ -100,7 +102,7 @@ class SttScreen(Screen):
     async def on_STTFullTranscriptionReady(self, message: STTFullTranscriptionReady) -> None:
         """Handle end of full transcription."""
         self._model_response = None
-        self.audio_model.cancel()
+        await self.audio_model.cancel()
     
     async def action_stop_generation(self) -> None:
         """Action to stop recording."""
@@ -108,6 +110,6 @@ class SttScreen(Screen):
             self._recording = False
             self.audio_processor.stop(flush_partial=True)
             self._set_recording_indicator(recording=False)
-            self.audio_model.cancel()
+            await self.audio_model.cancel()
             self._model_response = None
     

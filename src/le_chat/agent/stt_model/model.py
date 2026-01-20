@@ -45,6 +45,7 @@ class MLXAudioSTTModel(STTModelBase):
     # async def change_model
 
     async def transcribe(self) -> None:
+        self._cancel_event.clear()
         while not self._cancel_event.is_set():
             try:
                 audio_path = self._process_queue.get(timeout=1.0)
