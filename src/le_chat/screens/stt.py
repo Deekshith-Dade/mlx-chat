@@ -1,9 +1,10 @@
-from typing import Union
 from textual import containers, on, work, events
 from textual.reactive import var
 from textual.screen import Screen
 
-from le_chat.agent.stt_model.base import STTFullTranscriptionReady, STTModelLoading, STTModelReady
+import mlx.core as mx
+
+from le_chat.agent.stt_model.base import STTFullTranscriptionReady, STTModelFail, STTModelLoading, STTModelReady
 from le_chat.audio import AudioProcessor
 from le_chat.utils.prompt.extract import validate_input_files
 from le_chat.widgets.prompt import Prompt, UserInputSubmitted
@@ -11,7 +12,6 @@ from le_chat.widgets.stt_response import STTResponse, STTResponseUpdate
 from le_chat.widgets.non_selectable_label import NonSelectableLabel
 from le_chat.widgets.throbber import Throbber
 from le_chat.widgets.user_input import UserInput
-
 
 
 
@@ -24,7 +24,8 @@ class SttScreen(Screen):
 
     # mlx-community/parakeet-tdt-0.6b-v2
     # mlx-community/whisper-large-v3-turbo
-    model_name: var[str | None] = var("mlx-community/whisper-large-v3-turbo")
+    # mlx-community/Voxtral-Mini-3B-2507-bf16
+    model_name: var[str | None] = var("mlx-community/parakeet-tdt-0.6b-v2")
 
     def __init__(self, sample_rate=16000, chunk_sec=5.0):
         super().__init__()
@@ -95,6 +96,27 @@ class SttScreen(Screen):
         indicator = self.query_one("#recording-indicator", NonSelectableLabel)
         indicator.update("Recording..." if recording else "Idle")
         indicator.set_class(recording, "-recording")
+
+    @on(STTModelReady)
+    async def on_model_ready(self, event: STTModelReady) -> None:
+        message = f"{self.model_name} loaded. Press SPACE to start/stop recording or Drop audio files below."
+        if self._model_response is not None:
+            await self._model_response.append_fragment(message)
+        else:
+            stt_view = self.query_one("#stt-view", containers.VerticalScroll)
+            await stt_view.mount(response := STTResponse(message))
+            response.anchor()
+    
+    @on(STTModelFail)
+    async def on_model_fail(self, event: STTModelFail) -> None:
+        """Handle model loading or transcription failure."""
+        if self._model_response is not None:
+            await self._model_response.append_fragment(f"Error: {event.message} : {event.details}")
+        else:
+            stt_view = self.query_one("#stt-view", containers.VerticalScroll)
+            await stt_view.mount(response := STTResponse(f"Error: {event.message} : {event.details}"))
+            response.anchor()
+            
 
     @on(STTResponseUpdate)
     async def on_STTResponseUpdate(self, message: STTResponseUpdate) -> None:

@@ -46,6 +46,41 @@ STTResponse {
     color: #e0e0e0;
     margin: 1 2 2 2;
     padding: 1 2 1 2;
+    
+    #header {
+        height: auto;
+        align: right top;
+        
+        CopyButton {
+            min-width: 4;
+            margin: 1 1;
+            height: auto;
+            background: #222222;
+            color: #cccccc;
+            border: none;
+            padding: 0 0;
+            
+            &:hover {
+                color: #ffffff;
+                background: #444444;
+            }
+            
+            &.-copied {
+                color: #55ff55;
+                background: #1a3a1a;
+            }
+            
+            &.-failed {
+                color: #ff5555;
+                background: #3a1a1a;
+            }
+        }
+    }
+    
+    #content {
+        margin: 0;
+        padding: 0;
+    }
 }
 
 Prompt {

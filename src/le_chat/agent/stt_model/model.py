@@ -3,6 +3,7 @@ import queue
 import threading
 from typing import Union
 
+import mlx.core as mx
 # Import huggingface_utils first to apply tqdm patches before other imports
 from le_chat.agent.huggingface_utils import download_model
 
@@ -13,6 +14,7 @@ from mlx_audio.utils import load_model
 
 from le_chat.widgets.stt_response import STTResponseUpdate
 
+generation_stream = mx.new_stream(mx.default_device())
 
 class MLXAudioSTTModel(STTModelBase):
     def __init__(self, model_name: str) -> None:
@@ -63,7 +65,7 @@ class MLXAudioSTTModel(STTModelBase):
             audio_path = [audio_path]
         for path in audio_path:
             try:
-                segments = self.model.generate(path, verbose=True)
+                segments = self.model.generate(path, generation_stream=generation_stream, verbose=True)
                 self.post_message(STTResponseUpdate(segments.text))
             except Exception as e:
                 import traceback
