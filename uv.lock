@@ -1348,8 +1348,10 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "mlx-audio" },
+    { name = "mlx-lm" },
     { name = "mlx-vlm" },
     { name = "python-dotenv" },
+    { name = "sentencepiece" },
     { name = "sounddevice" },
     { name = "textual" },
     { name = "textual-dev" },
@@ -1364,8 +1366,10 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "mlx-audio", specifier = ">=0.2.10" },
+    { name = "mlx-lm", specifier = ">=0.29.1" },
     { name = "mlx-vlm", specifier = ">=0.3.9" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "sentencepiece", specifier = ">=0.2.1" },
     { name = "sounddevice", specifier = ">=0.5.3" },
     { name = "textual", specifier = ">=7.2.0" },
     { name = "textual-dev", specifier = ">=1.8.0" },

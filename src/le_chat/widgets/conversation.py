@@ -43,7 +43,10 @@ class Conversation(containers.Vertical):
     # lmstudio-community/gemma-3n-E4B-it-MLX-8bit
     # lmstudio-community/Qwen3-VL-4B-Instruct-MLX-4bit
     # mlx-community/medgemma-1.5-4b-it-4bit
-    model_name: var[str | None] = var("lmstudio-community/Qwen3-VL-4B-Instruct-MLX-4bit")
+    # mlx-community/Mistral-7B-Instruct-v0.3-4bit
+    # mlx-community/LFM2.5-1.2B-Thinking-8bit
+    # mlx-community/LFM2.5-1.2B-Thinking-bf16
+    model_name: var[str | None] = var("mlx-community/medgemma-1.5-4b-it-4bit")
 
     def __init__(self):
         super().__init__()
